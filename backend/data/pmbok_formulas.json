@@ -1,0 +1,18 @@
+[
+  {"name": "Cost Performance Index (CPI)", "formula": "CPI = EV / AC", "category": "evm", "description": "Measures cost efficiency of budgeted resources"},
+  {"name": "Schedule Performance Index (SPI)", "formula": "SPI = EV / PV", "category": "evm", "description": "Measures schedule efficiency"},
+  {"name": "Cost Variance (CV)", "formula": "CV = EV - AC", "category": "evm", "description": "Difference between earned value and actual cost"},
+  {"name": "Schedule Variance (SV)", "formula": "SV = EV - PV", "category": "evm", "description": "Difference between earned value and planned value"},
+  {"name": "Estimate at Completion (EAC)", "formula": "EAC = BAC / CPI", "category": "evm", "description": "Projected total cost at completion"},
+  {"name": "Estimate to Complete (ETC)", "formula": "ETC = EAC - AC", "category": "evm", "description": "Expected cost to complete remaining work"},
+  {"name": "Variance at Completion (VAC)", "formula": "VAC = BAC - EAC", "category": "evm", "description": "Expected budget surplus or deficit"},
+  {"name": "To-Complete Performance Index (TCPI)", "formula": "TCPI = (BAC - EV) / (BAC - AC)", "category": "evm", "description": "Required performance to complete on budget"},
+  {"name": "PERT Estimate", "formula": "(O + 4M + P) / 6", "category": "risk", "description": "Weighted average of three-point estimates"},
+  {"name": "Standard Deviation", "formula": "(P - O) / 6", "category": "risk", "description": "Measure of estimate uncertainty"},
+  {"name": "Expected Monetary Value", "formula": "EMV = P × I", "category": "risk", "description": "Average outcome of risk events"},
+  {"name": "Communication Channels", "formula": "N(N-1)/2", "category": "communication", "description": "Number of communication paths in a team"},
+  {"name": "Return on Investment", "formula": "(Net Profit / Cost) × 100", "category": "business", "description": "Percentage return on investment"},
+  {"name": "Present Value", "formula": "PV = FV / (1+r)^n", "category": "business", "description": "Current value of future money"},
+  {"name": "Critical Path", "formula": "Longest path through network", "category": "schedule", "description": "Sequence determining minimum project duration"},
+  {"name": "Total Float", "formula": "LS - ES or LF - EF", "category": "schedule", "description": "Time an activity can be delayed without delaying project"}
+]

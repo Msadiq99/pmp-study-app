@@ -1,0 +1,14 @@
+[
+  {"name": "Stakeholder Performance", "domain": "people", "description": "Focus on collaborative project team environment and effective stakeholder engagement", "color": "#3B82F6"},
+  {"name": "Team Performance", "domain": "people", "description": "Building and managing high-performing teams", "color": "#3B82F6"},
+  {"name": "Planning and Managing Project Work", "domain": "process", "description": "Develop and manage the project schedule, budget, and resources", "color": "#10B981"},
+  {"name": "Managing Project Changes", "domain": "process", "description": "Anticipate and manage project changes", "color": "#10B981"},
+  {"name": "Managing Project Risks", "domain": "process", "description": "Identify and manage project risks", "color": "#10B981"},
+  {"name": "Engaging Stakeholders", "domain": "people", "description": "Effectively engage stakeholders throughout the project", "color": "#3B82F6"},
+  {"name": "Promoting Team Performance", "domain": "people", "description": "Empowering team members and stakeholders", "color": "#3B82F6"},
+  {"name": "Planning and Managing Schedule", "domain": "process", "description": "Managing project timelines and milestones", "color": "#10B981"},
+  {"name": "Planning and Managing Budget", "domain": "process", "description": "Cost management and financial control", "color": "#10B981"},
+  {"name": "Managing Project Quality", "domain": "process", "description": "Ensuring project deliverables meet requirements", "color": "#10B981"},
+  {"name": "Managing Scope", "domain": "process", "description": "Defining and controlling project scope", "color": "#10B981"},
+  {"name": "Business Environment", "domain": "business_environment", "description": "Understanding organizational strategy and value delivery", "color": "#F59E0B"}
+]
