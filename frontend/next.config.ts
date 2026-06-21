@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
-  basePath: "",
+  basePath: "/pmp-study-app",
 };
 
 export default nextConfig;
