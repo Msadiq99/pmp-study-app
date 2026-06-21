@@ -10,7 +10,7 @@ from config import settings
 
 class RAGService:
     def __init__(self):
-        self.ollama_url = f"{settings.OLLAMA_BASE_URL}/api/generate"
+        pass
 
     async def index_document_chunks(self, db: AsyncSession, document_id: int, chunks: List[Dict]):
         texts = [c["content"] for c in chunks]
@@ -57,7 +57,41 @@ class RAGService:
             for row in rows
         ]
 
-    async def generate_answer(self, query: str, context_chunks: List[Dict], model: str = "llama3.2") -> str:
+    async def _call_ollama(self, prompt: str, model: str = None) -> str:
+        model = model or settings.OLLAMA_MODEL
+        url = f"{settings.ollama_url}/api/generate"
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(url, json={"model": model, "prompt": prompt, "stream": False})
+            response.raise_for_status()
+            return response.json().get("response", "")
+
+    async def _call_claude(self, prompt: str, model: str = None) -> str:
+        model = model or settings.CLAUDE_MODEL
+        url = "https://api.anthropic.com/v1/messages"
+        headers = {
+            "x-api-key": settings.CLAUDE_API_KEY,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        }
+        payload = {
+            "model": model,
+            "max_tokens": 4096,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(url, json=payload, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            return data["content"][0]["text"] if data.get("content") else ""
+
+    async def _call_llm(self, prompt: str, model: str = None) -> str:
+        provider = settings.LLM_PROVIDER
+        if provider == "claude":
+            return await self._call_claude(prompt, model)
+        else:
+            return await self._call_ollama(prompt, model)
+
+    async def generate_answer(self, query: str, context_chunks: List[Dict], model: str = None) -> str:
         context = "\n\n---\n\n".join([
             f"Source: {c['filename']}, Page {c.get('page_number', 'N/A')}\n{c['content']}"
             for c in context_chunks
@@ -72,31 +106,22 @@ Question: {query}
 
 Answer:"""
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                response = await client.post(
-                    self.ollama_url,
-                    json={
-                        "model": model,
-                        "prompt": prompt,
-                        "stream": False,
-                    }
-                )
-                response.raise_for_status()
-                return response.json().get("response", "I couldn't generate an answer.")
+            return await self._call_llm(prompt, model)
         except Exception as e:
-            return f"I'm having trouble connecting to the AI model. Please ensure Ollama is running. Error: {str(e)}"
+            provider = settings.LLM_PROVIDER
+            if provider == "claude":
+                hint = "Check CLAUDE_API_KEY in your .env file."
+            elif provider == "ollama_cloud":
+                hint = "Check OLLAMA_CLOUD_URL and OLLAMA_CLOUD_KEY in your .env file."
+            else:
+                hint = "Ensure Ollama is running: ollama serve"
+            return f"AI service error ({provider}): {str(e)}. {hint}"
 
-    async def generate_from_prompt(self, prompt: str, model: str = "llama3.2") -> str:
+    async def generate_from_prompt(self, prompt: str, model: str = None) -> str:
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                response = await client.post(
-                    self.ollama_url,
-                    json={"model": model, "prompt": prompt, "stream": False}
-                )
-                response.raise_for_status()
-                return response.json().get("response", "")
+            return await self._call_llm(prompt, model)
         except Exception as e:
-            return f"Error: {str(e)}"
+            return f"AI service error: {str(e)}"
 
 
 rag_service = RAGService()

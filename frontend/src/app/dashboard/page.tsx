@@ -1,16 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { analytics } from "@/lib/api";
 
 export default function Dashboard() {
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
-      localStorage.setItem("token", "demo-token");
-      localStorage.setItem("user", JSON.stringify({ id: 1, email: "demo@pmpstudy.app", username: "DemoUser" }));
+      router.push("/login");
+      return;
     }
     analytics.dashboard().then((r) => { setData(r.data); setLoading(false); }).catch(() => setLoading(false));
   }, []);
