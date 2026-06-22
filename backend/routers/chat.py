@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -18,9 +18,11 @@ async def chat(
     data: ChatRequest,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    x_ai_provider: str = Header(None),
+    x_ai_model: str = Header(None),
 ):
     chunks = await rag_service.search_similar(db, data.message, user.id, top_k=3)
-    response = await chat_agent.chat(data.message, context_chunks=chunks)
+    response = await chat_agent.chat(data.message, context_chunks=chunks, provider=x_ai_provider, model=x_ai_model)
     return {
         "response": response,
         "sources": [
@@ -35,7 +37,9 @@ async def explain_concept(
     concept: str,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    x_ai_provider: str = Header(None),
+    x_ai_model: str = Header(None),
 ):
     chunks = await rag_service.search_similar(db, concept, user.id, top_k=3)
-    response = await chat_agent.explain_concept(concept, context_chunks=chunks)
+    response = await chat_agent.explain_concept(concept, context_chunks=chunks, provider=x_ai_provider, model=x_ai_model)
     return {"response": response, "concept": concept}

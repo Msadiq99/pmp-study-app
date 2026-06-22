@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, update, func
 from sqlalchemy.orm import selectinload
@@ -18,6 +18,8 @@ async def generate_quiz(
     data: QuizCreate,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    x_ai_provider: str = Header(None),
+    x_ai_model: str = Header(None),
 ):
     try:
         quiz = await quiz_generator.generate_quiz(
@@ -27,6 +29,8 @@ async def generate_quiz(
             num_questions=data.num_questions,
             question_types=data.question_types,
             title=data.title,
+            provider=x_ai_provider,
+            model=x_ai_model,
         )
         # Reload with relationships
         result = await db.execute(

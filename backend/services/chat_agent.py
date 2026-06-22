@@ -18,7 +18,7 @@ Your capabilities:
 Always be encouraging and educational. When answering, reference PMBOK concepts when relevant.
 If you don't know something, say so rather than guessing."""
 
-    async def chat(self, message: str, context_chunks: Optional[List[Dict]] = None, history: Optional[List[Dict]] = None) -> str:
+    async def chat(self, message: str, context_chunks: Optional[List[Dict]] = None, history: Optional[List[Dict]] = None, provider: str = None, model: str = None) -> str:
         system = self.system_prompt
         
         # Enforce Chain-of-Thought reasoning
@@ -52,10 +52,10 @@ If you don't know something, say so rather than guessing."""
         messages.append({"role": "user", "content": message})
 
         prompt = f"{system}\n\nUser: {message}\nAssistant:"
-        response = await rag_service.generate_from_prompt(prompt)
+        response = await rag_service.generate_from_prompt(prompt, provider=provider, model=model)
         return response
 
-    async def explain_concept(self, concept: str, context_chunks: Optional[List[Dict]] = None) -> str:
+    async def explain_concept(self, concept: str, context_chunks: Optional[List[Dict]] = None, provider: str = None, model: str = None) -> str:
         prompt = f"""Explain the PMP concept "{concept}" in detail.
 Include:
 1. Definition
@@ -63,9 +63,9 @@ Include:
 3. How it relates to other PMBOK concepts
 4. A real-world example
 5. Common exam questions about it"""
-        return await self.chat(prompt, context_chunks)
+        return await self.chat(prompt, context_chunks, provider=provider, model=model)
 
-    async def evaluate_teach_back(self, topic: str, student_explanation: str) -> Dict:
+    async def evaluate_teach_back(self, topic: str, student_explanation: str, provider: str = None, model: str = None) -> Dict:
         prompt = f"""Evaluate this student's explanation of "{topic}":
 
 "{student_explanation}"
@@ -78,7 +78,7 @@ Respond in JSON format:
     "suggestions": ["how to improve"],
     "corrected_explanation": "a complete correct explanation"
 }}"""
-        response = await rag_service.generate_from_prompt(prompt)
+        response = await rag_service.generate_from_prompt(prompt, provider=provider, model=model)
         import json
         try:
             json_start = response.find('{')

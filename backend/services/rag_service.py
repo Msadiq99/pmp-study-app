@@ -84,14 +84,51 @@ class RAGService:
             data = response.json()
             return data["content"][0]["text"] if data.get("content") else ""
 
-    async def _call_llm(self, prompt: str, model: str = None) -> str:
-        provider = settings.LLM_PROVIDER
+    async def _call_openai(self, prompt: str, model: str = None) -> str:
+        model = model or settings.OPENAI_MODEL
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.7,
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(url, json=payload, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            return data["choices"][0]["message"]["content"]
+
+    async def _call_gemini(self, prompt: str, model: str = None) -> str:
+        model = model or settings.GEMINI_MODEL
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={settings.GEMINI_API_KEY}"
+        headers = {
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}]
+        }
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(url, json=payload, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+
+    async def _call_llm(self, prompt: str, provider: str = None, model: str = None) -> str:
+        provider = provider or settings.LLM_PROVIDER
         if provider == "claude":
             return await self._call_claude(prompt, model)
+        elif provider == "openai":
+            return await self._call_openai(prompt, model)
+        elif provider == "gemini":
+            return await self._call_gemini(prompt, model)
         else:
             return await self._call_ollama(prompt, model)
 
-    async def generate_answer(self, query: str, context_chunks: List[Dict], model: str = None) -> str:
+    async def generate_answer(self, query: str, context_chunks: List[Dict], provider: str = None, model: str = None) -> str:
         context = "\n\n---\n\n".join([
             f"Source: {c['filename']}, Page {c.get('page_number', 'N/A')}\n{c['content']}"
             for c in context_chunks
@@ -110,20 +147,20 @@ Question: {query}
 
 Answer:"""
         try:
-            return await self._call_llm(prompt, model)
+            return await self._call_llm(prompt, provider, model)
         except Exception as e:
-            provider = settings.LLM_PROVIDER
-            if provider == "claude":
+            provider_used = provider or settings.LLM_PROVIDER
+            if provider_used == "claude":
                 hint = "Check CLAUDE_API_KEY in your .env file."
-            elif provider == "ollama_cloud":
+            elif provider_used == "ollama_cloud":
                 hint = "Check OLLAMA_CLOUD_URL and OLLAMA_CLOUD_KEY in your .env file."
             else:
                 hint = "Ensure Ollama is running: ollama serve"
-            return f"AI service error ({provider}): {str(e)}. {hint}"
+            return f"AI service error ({provider_used}): {str(e)}. {hint}"
 
-    async def generate_from_prompt(self, prompt: str, model: str = None) -> str:
+    async def generate_from_prompt(self, prompt: str, provider: str = None, model: str = None) -> str:
         try:
-            return await self._call_llm(prompt, model)
+            return await self._call_llm(prompt, provider, model)
         except Exception as e:
             return f"AI service error: {str(e)}"
 

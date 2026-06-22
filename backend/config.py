@@ -20,7 +20,11 @@ class Settings(BaseSettings):
     OLLAMA_CLOUD_KEY: str = os.getenv("OLLAMA_CLOUD_KEY", "")
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.2")
     CLAUDE_API_KEY: str = os.getenv("CLAUDE_API_KEY", "")
-    CLAUDE_MODEL: str = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-20250514")
+    CLAUDE_MODEL: str = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-20240620")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-pro")
 
     @property
     def ollama_url(self) -> str:

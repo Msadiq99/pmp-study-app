@@ -14,6 +14,14 @@ api.interceptors.request.use((config) => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    const provider = localStorage.getItem("x_ai_provider");
+    const model = localStorage.getItem("x_ai_model");
+    if (provider) {
+      config.headers["X-AI-Provider"] = provider;
+    }
+    if (model) {
+      config.headers["X-AI-Model"] = model;
+    }
   }
   return config;
 });

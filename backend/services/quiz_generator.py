@@ -20,6 +20,8 @@ class QuizGenerator:
         num_questions: int = 10,
         question_types: List[str] = None,
         title: str = "Practice Quiz",
+        provider: str = None,
+        model: str = None,
     ) -> Quiz:
         if question_types is None:
             question_types = ["mcq", "true_false"]
@@ -104,7 +106,7 @@ Content:
 
 JSON:"""
 
-            response = await rag_service.generate_from_prompt(prompt)
+            response = await rag_service.generate_from_prompt(prompt, provider=provider, model=model)
             try:
                 json_start = response.find('[')
                 json_end = response.rfind(']') + 1

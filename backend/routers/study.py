@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime, timezone
@@ -76,8 +76,10 @@ async def get_study_plan(
 async def evaluate_voice_teach_back(
     data: VoiceTranscript,
     user: User = Depends(get_current_user),
+    x_ai_provider: str = Header(None),
+    x_ai_model: str = Header(None),
 ):
     if not data.topic:
         raise HTTPException(status_code=400, detail="Topic is required")
-    evaluation = await voice_service.evaluate_teach_back(data.topic, data.text)
+    evaluation = await voice_service.evaluate_teach_back(data.topic, data.text, provider=x_ai_provider, model=x_ai_model)
     return evaluation

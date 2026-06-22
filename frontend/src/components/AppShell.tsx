@@ -32,11 +32,30 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [streak, setStreak] = useState(0);
   const [daysUntilExam] = useState(47);
+  const [showSettings, setShowSettings] = useState(false);
+  const [aiProvider, setAiProvider] = useState("");
+  const [aiModel, setAiModel] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("study_streak");
     setStreak(stored ? parseInt(stored) : 7);
+    setAiProvider(localStorage.getItem("x_ai_provider") || "ollama_local");
+    setAiModel(localStorage.getItem("x_ai_model") || "llama3.2");
   }, []);
+
+  const saveSettings = () => {
+    localStorage.setItem("x_ai_provider", aiProvider);
+    localStorage.setItem("x_ai_model", aiModel);
+    setShowSettings(false);
+  };
+
+  const modelOptions: Record<string, string[]> = {
+    "ollama_local": ["llama3.2", "llama3", "mistral", "gemma2"],
+    "ollama_cloud": ["llama3.2", "llama3", "mistral", "gemma2"],
+    "openai": ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"],
+    "claude": ["claude-3-5-sonnet-20240620", "claude-3-haiku-20240307", "claude-3-opus-20240229"],
+    "gemini": ["gemini-1.5-pro", "gemini-1.5-flash"]
+  };
 
   const groupedNav = NAV_ITEMS.reduce((acc, item) => {
     if (!acc[item.section]) acc[item.section] = [];
@@ -155,6 +174,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               ⏳ {daysUntilExam}d to exam
             </div>
             <button
+              onClick={() => setShowSettings(true)}
+              className="btn-ghost text-xs flex items-center gap-1"
+            >
+              <span>⚙️</span> Settings
+            </button>
+            <button
               onClick={() => { localStorage.removeItem("token"); window.location.href = "/login"; }}
               className="btn-ghost text-xs"
             >
@@ -162,6 +187,67 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         </header>
+
+        {/* Settings Modal */}
+        {showSettings && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="glass-panel p-6 rounded-2xl w-full max-w-md animate-scale-up border" style={{ borderColor: "var(--color-border)" }}>
+              <h2 className="text-xl font-bold mb-4 gradient-text">AI Settings</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-muted-foreground)" }}>AI Provider</label>
+                  <select
+                    value={aiProvider}
+                    onChange={(e) => {
+                      setAiProvider(e.target.value);
+                      setAiModel(modelOptions[e.target.value]?.[0] || "");
+                    }}
+                    className="w-full p-2 rounded-lg bg-black/20 border text-white"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    <option value="ollama_local">Ollama (Local)</option>
+                    <option value="ollama_cloud">Ollama (Cloud)</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="claude">Anthropic Claude</option>
+                    <option value="gemini">Google Gemini</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-muted-foreground)" }}>Model</label>
+                  <select
+                    value={aiModel}
+                    onChange={(e) => setAiModel(e.target.value)}
+                    className="w-full p-2 rounded-lg bg-black/20 border text-white"
+                    style={{ borderColor: "var(--color-border)" }}
+                  >
+                    {(modelOptions[aiProvider] || []).map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="px-4 py-2 rounded-lg text-sm transition-colors hover:bg-white/5"
+                  style={{ color: "var(--color-muted-foreground)" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveSettings}
+                  className="px-4 py-2 rounded-lg text-sm font-bold text-white transition-transform hover:scale-105 active:scale-95"
+                  style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)", boxShadow: "0 4px 12px rgba(99,102,241,0.3)" }}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto" style={{ background: "var(--color-background)" }}>
