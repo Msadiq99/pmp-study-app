@@ -1,14 +1,16 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === "production" && process.env.GITHUB_ACTIONS === "true";
+// Only enable static export + basePath when deploying via GitHub Actions
+const isGitHubPages = process.env.GITHUB_ACTIONS === "true";
 
 const nextConfig: NextConfig = {
-  ...(isProd && { output: "export" }),
+  output: isGitHubPages ? "export" : undefined,
   images: {
     unoptimized: true,
   },
-  trailingSlash: false,
-  basePath: isProd ? "/pmp-study-app" : "",
+  trailingSlash: isGitHubPages,
+  basePath: isGitHubPages ? "/pmp-study-app" : "",
+  assetPrefix: isGitHubPages ? "/pmp-study-app/" : "",
 };
 
 export default nextConfig;
