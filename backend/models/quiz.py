@@ -33,7 +33,7 @@ class QuizQuestion(Base):
     question_type = Column(String(50), nullable=False)  # mcq, true_false, fill_blank, matching
     correct_answer = Column(Text, nullable=False)
     explanation = Column(Text, nullable=True)
-    source_chunk_id = Column(Integer, ForeignKey("document_chunks.id"), nullable=True)
+    source_chunk_id = Column(Integer, ForeignKey("document_chunks.id", ondelete="SET NULL"), nullable=True)
     difficulty = Column(Float, default=0.5)
     knowledge_area = Column(String(200), nullable=True)
     order_index = Column(Integer, default=0)

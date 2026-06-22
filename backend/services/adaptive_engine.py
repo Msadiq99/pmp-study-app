@@ -1,5 +1,5 @@
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
@@ -83,7 +83,7 @@ class AdaptiveEngine:
 
         new_stability = max(0.1, new_stability)
         interval_days = max(1, int(new_stability))
-        next_review = datetime.utcnow() + timedelta(days=interval_days)
+        next_review = datetime.now(timezone.utc) + timedelta(days=interval_days)
         new_retrievability = math.exp(-0.5 * (1 / new_stability))
 
         return {
@@ -96,7 +96,7 @@ class AdaptiveEngine:
         }
 
     async def get_due_cards(self, db: AsyncSession, user_id: int, limit: int = 20) -> List[Flashcard]:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         result = await db.execute(
             select(Flashcard).where(
                 and_(

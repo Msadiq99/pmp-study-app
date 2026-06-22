@@ -63,8 +63,14 @@ class AnalyticsService:
         streak = 0
         from datetime import date, timedelta
         today = date.today()
+        
+        if unique_dates[0] < today - timedelta(days=1):
+            return 0
+            
+        start_date = today if unique_dates[0] == today else (today - timedelta(days=1))
+        
         for d in unique_dates:
-            if d == today - timedelta(days=streak):
+            if d == start_date - timedelta(days=streak):
                 streak += 1
             else:
                 break

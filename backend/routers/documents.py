@@ -2,7 +2,7 @@ import os
 import json
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from database import get_db
 from models.user import User
 from models.document import Document, DocumentChunk
@@ -89,12 +89,9 @@ async def list_documents(
     docs = result.scalars().all()
     responses = []
     for doc in docs:
-        chunk_count = await db.scalar(
-            select(DocumentChunk.id).where(DocumentChunk.document_id == doc.id)
-        )
         resp = DocumentResponse.model_validate(doc)
         resp.chunk_count = await db.scalar(
-            select(DocumentChunk.id).where(DocumentChunk.document_id == doc.id).limit(1)
+            select(func.count(DocumentChunk.id)).where(DocumentChunk.document_id == doc.id)
         ) or 0
         responses.append(resp)
     return responses

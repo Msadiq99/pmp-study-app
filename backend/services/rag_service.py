@@ -22,7 +22,7 @@ class RAGService:
                 chunk_index=i,
                 page_number=chunk.get("page_number"),
                 heading=chunk.get("heading"),
-                embedding=json.dumps(embedding),
+                embedding=embedding,
             )
             db.add(db_chunk)
         await db.commit()
@@ -96,8 +96,12 @@ class RAGService:
             f"Source: {c['filename']}, Page {c.get('page_number', 'N/A')}\n{c['content']}"
             for c in context_chunks
         ])
-        prompt = f"""You are a PMP exam preparation tutor. Answer the question based ONLY on the provided context.
-If the context doesn't contain enough information, say so.
+        prompt = f"""You are a PMP exam preparation tutor. Answer the question based on the provided context, adhering strictly to PMI standards and PMBOK Guide 7th Edition concepts.
+
+Guidelines:
+1. Base your answer only on the provided context and verified PMP rules.
+2. If the context doesn't contain enough information, state that clearly but try to explain the relevant general PMP principle.
+3. Formulate the response with clear headings, bullet points, and reference the source files/pages provided in the context when applicable.
 
 Context:
 {context}

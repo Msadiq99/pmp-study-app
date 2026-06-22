@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-export PATH="$HOME/.local/node/bin:$PATH"
-PROJECT_DIR="$HOME/Documents/pmp-study-app"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_DIR="$( dirname "$SCRIPT_DIR" )"
 
 echo "============================================"
 echo "  PMP Study App - Startup Script"
@@ -49,6 +49,7 @@ npm install --silent 2>/dev/null
 # 5. Start backend
 echo "[5/6] Starting backend server..."
 cd "$PROJECT_DIR/backend"
+python3 "$PROJECT_DIR/scripts/seed_pmbok.py"
 python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 sleep 3

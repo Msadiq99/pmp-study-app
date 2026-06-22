@@ -20,6 +20,28 @@ If you don't know something, say so rather than guessing."""
 
     async def chat(self, message: str, context_chunks: Optional[List[Dict]] = None, history: Optional[List[Dict]] = None) -> str:
         system = self.system_prompt
+        
+        # Enforce Chain-of-Thought reasoning
+        system += """\n\nWhen explaining or answering questions about PMP certification concepts:
+1. Clearly identify the relevant PMP Process Group and Knowledge Area (or Agile principles).
+2. Use Chain-of-Thought (CoT) reasoning to evaluate options or concepts. Explain why distractors or incorrect paths are invalid under PMI standards.
+3. Conclude with the correct PMBOK principles or guidelines."""
+
+        # Personalize persona dynamically based on detected methodology
+        lower_msg = message.lower()
+        agile_keywords = ["agile", "scrum", "sprint", "kanban", "retrospective", "backlog", "product owner", "scrum master", "daily standup", "iterations", "increment"]
+        predictive_keywords = ["predictive", "waterfall", "earned value", "evm", "critical path", "wbs", "project charter", "change control", "baseline", "variance", "cpi", "spi"]
+        
+        is_agile = any(k in lower_msg for k in agile_keywords)
+        is_predictive = any(k in lower_msg for k in predictive_keywords)
+        
+        if is_agile and not is_predictive:
+            system += "\n\nPersona: Adopt the role of an Agile Coach and Agile Mentor. Your tone should be collaborative, flexible, and value-driven, emphasizing iterative improvement and adaptive planning."
+        elif is_predictive and not is_agile:
+            system += "\n\nPersona: Adopt the role of a Predictive/Waterfall Project Management Expert. Your tone should be structured, formal, and analytical, emphasizing scope baselines, critical paths, and standard change control processes."
+        else:
+            system += "\n\nPersona: Adopt a balanced Hybrid Project Management Tutor persona, mirroring the structure of the PMBOK Guide 7th Edition."
+
         if context_chunks:
             context = "\n\n".join([f"[Source: {c.get('filename', 'unknown')}]\n{c['content']}" for c in context_chunks])
             system += f"\n\nRelevant context from uploaded materials:\n{context}"

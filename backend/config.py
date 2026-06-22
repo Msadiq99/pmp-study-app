@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
     CHUNK_SIZE: int = 800
     CHUNK_OVERLAP: int = 200
+    DISABLE_LOGIN: bool = os.getenv("DISABLE_LOGIN", "true").lower() == "true"
 
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "ollama_local")
     OLLAMA_LOCAL_URL: str = os.getenv("OLLAMA_LOCAL_URL", "http://localhost:11434")

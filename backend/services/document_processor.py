@@ -29,6 +29,8 @@ class DocumentProcessor:
         for page_num in range(len(doc)):
             page = doc.load_page(page_num)
             text = page.get_text("text")
+            if not text.strip():
+                text = f"[Warning: Page {page_num + 1} appears to be scanned or image-only. Text could not be extracted directly. Please use standard text PDFs or configure OCR extraction.]"
             pages.append({
                 "page_number": page_num + 1,
                 "text": text,

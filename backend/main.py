@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from routers import auth, documents, flashcards, quiz, study, analytics, chat, formulas, groups, exam
+from routers import auth, documents, flashcards, quiz, study, analytics, chat, formulas, groups, exam, ittos
 
 app.include_router(auth.router)
 app.include_router(documents.router)
@@ -27,6 +27,7 @@ app.include_router(chat.router)
 app.include_router(formulas.router)
 app.include_router(groups.router)
 app.include_router(exam.router)
+app.include_router(ittos.router)
 
 
 @app.on_event("startup")

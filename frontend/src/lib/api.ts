@@ -192,5 +192,20 @@ export const exam = {
   status: (id: number) => apiCall(() => api.get(`/api/exam/${id}/status`), () => mockResponse({ quiz_id: id, total_questions: 180, score: 0, is_completed: false })),
 };
 
+export const ittos = {
+  graph: () => apiCall(() => api.get("/api/ittos/graph"), () => mockResponse({
+    nodes: [
+      { id: "process-1", type: "default", data: { label: "Develop Project Charter", category: "Process" }, position: { x: 400, y: 250 }, style: { backgroundColor: "#3b82f6", color: "white", padding: "15px", borderRadius: "8px" } },
+      { id: "input-1", type: "input", data: { label: "Business Case", category: "Input" }, position: { x: 50, y: 150 }, style: { backgroundColor: "#10b981", color: "white", padding: "10px", borderRadius: "4px" } },
+      { id: "output-1", type: "output", data: { label: "Project Charter", category: "Output" }, position: { x: 750, y: 200 }, style: { backgroundColor: "#ef4444", color: "white", padding: "10px", borderRadius: "4px" } }
+    ],
+    edges: [
+      { id: "e1", source: "input-1", target: "process-1", animated: true, style: { stroke: "#10b981" } },
+      { id: "e7", source: "process-1", target: "output-1", animated: true, style: { stroke: "#ef4444" } }
+    ]
+  })),
+  explain: (id: string) => apiCall(() => api.get(`/api/ittos/nodes/${id}/explanation`), () => mockResponse({ explanation: "[Demo] This element is critical for the Develop Project Charter process." })),
+};
+
 const apiClient = { get: (url: string) => api.get(url), post: (url: string, data?: any) => api.post(url, data), put: (url: string, data?: any) => api.put(url, data), delete: (url: string) => api.delete(url) };
 export default apiClient;

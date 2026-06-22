@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from datetime import datetime
+from datetime import datetime, timezone
 from database import get_db
 from models.user import User
 from models.study_session import StudySession
@@ -47,7 +47,7 @@ async def end_study_session(
     session = result.scalar_one_or_none()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    session.ended_at = datetime.utcnow()
+    session.ended_at = datetime.now(timezone.utc)
     duration = (session.ended_at - session.started_at).total_seconds() / 60
     session.duration_minutes = int(duration)
     session.questions_attempted = questions_attempted

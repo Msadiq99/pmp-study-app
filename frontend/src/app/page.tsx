@@ -1,11 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function HomePage() {
   const router = useRouter();
   const [showSetup, setShowSetup] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("token", "dummy-bypass-token");
+      localStorage.setItem("user", JSON.stringify({ id: 1, email: "demo@pmpstudy.app", username: "DemoUser" }));
+      router.push("/dashboard");
+    }
+  }, []);
 
   const goToLogin = () => router.push("/login");
   const goToRegister = () => router.push("/register");

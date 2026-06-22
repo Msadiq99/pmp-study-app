@@ -188,6 +188,29 @@ class FormulaService:
         return [f for f in self.formulas if f["category"] == category]
 
     def calculate(self, formula_name: str, **kwargs) -> Dict:
+        # Normalize input keys to lowercase and map aliases
+        norm = {}
+        for k, v in kwargs.items():
+            k_lower = k.lower()
+            if k_lower in ["probability", "prob"]:
+                norm["p"] = v
+            elif k_lower in ["impact", "imp"]:
+                norm["i"] = v
+            elif k_lower in ["ceiling_price", "ceiling price"]:
+                norm["cp"] = v
+            elif k_lower in ["target_price", "target price"]:
+                norm["tp"] = v
+            elif k_lower in ["buyer_share", "buyer share", "buyer_share_ratio", "buyer share ratio"]:
+                norm["bs"] = v
+            elif k_lower in ["target_cost", "target cost"]:
+                norm["tc"] = v
+            elif k_lower in ["net_profit", "net profit"]:
+                norm["np"] = v
+            elif k_lower in ["cost_of_investment", "cost of investment", "cost", "ci"]:
+                norm["ci"] = v
+            else:
+                norm[k_lower] = v
+
         calculators = {
             "Cost Performance Index (CPI)": lambda ev, ac: ev / ac if ac else 0,
             "Schedule Performance Index (SPI)": lambda ev, pv: ev / pv if pv else 0,
@@ -196,18 +219,31 @@ class FormulaService:
             "Estimate at Completion (EAC)": lambda bac, cpi: bac / cpi if cpi else 0,
             "Estimate to Complete (ETC)": lambda eac, ac: eac - ac,
             "Variance at Completion (VAC)": lambda bac, eac: bac - eac,
+            "To-Complete Performance Index (TCPI)": lambda bac, ev, ac: (bac - ev) / (bac - ac) if (bac - ac) else 0,
             "Communication Channels": lambda n: n * (n - 1) / 2,
-            "Expected Value (EMV)": lambda probability, impact: probability * impact,
-            "Point of Total Assumption (PTA)": lambda ceiling_price, target_price, buyer_share, target_cost: ((ceiling_price - target_price) / buyer_share) + target_cost if buyer_share else 0,
-            "Return on Investment (ROI)": lambda net_profit, cost: (net_profit / cost) * 100 if cost else 0,
+            "Expected Value (EMV)": lambda p, i: p * i,
+            "Expected Monetary Value": lambda p, i: p * i,
+            "Point of Total Assumption (PTA)": lambda cp, tp, bs, tc: ((cp - tp) / bs) + tc if bs else 0,
+            "Return on Investment (ROI)": lambda np, ci: (np / ci) * 100 if ci else 0,
+            "Return on Investment": lambda np, ci: (np / ci) * 100 if ci else 0,
             "Present Value (PV)": lambda fv, r, n: fv / ((1 + r) ** n) if r != -1 else 0,
+            "Present Value": lambda fv, r, n: fv / ((1 + r) ** n) if r != -1 else 0,
             "PERT Estimate": lambda o, m, p: (o + 4 * m + p) / 6,
             "Standard Deviation (Risk)": lambda p, o: (p - o) / 6 if p != o else 0,
+            "Standard Deviation": lambda p, o: (p - o) / 6 if p != o else 0,
+            "Total Float": lambda ls, es: ls - es,
+            "Free Float": lambda es, ef: es - ef - 1,
         }
         calc = calculators.get(formula_name)
         if calc:
             try:
-                result = calc(**kwargs)
+                import inspect
+                sig = inspect.signature(calc)
+                params = sig.parameters.keys()
+                filtered_inputs = {k: v for k, v in norm.items() if k in params}
+                inputs = {k: 0.0 for k in params}
+                inputs.update(filtered_inputs)
+                result = calc(**inputs)
                 return {"formula": formula_name, "result": round(result, 4), "inputs": kwargs}
             except Exception as e:
                 return {"formula": formula_name, "error": str(e), "inputs": kwargs}
